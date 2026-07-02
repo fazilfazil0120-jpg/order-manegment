@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Culinary Haven | Premium Dining</title>
+    <meta name="description" content="Experience premium dining at The Culinary Haven. Discover our exquisite menu and book a table today.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">Culinary Haven</a>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#menu">Menu</a></li>
+                <li><a href="#reservation">Reservation</a></li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>Savor the Art of <br><span class="highlight">Fine Dining</span></h1>
+            <p>A symphony of flavors awaits you. Experience culinary perfection in an elegant atmosphere.</p>
+            <a href="#menu" class="btn btn-primary">Explore Menu</a>
+        </div>
+        <div class="hero-overlay"></div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-text">
+                    <h2>Our Story</h2>
+                    <div class="divider"></div>
+                    <p>Founded in 2010, The Culinary Haven has been a beacon of gastronomic excellence. Our passionate chefs blend traditional techniques with modern innovation to create dishes that are as visually stunning as they are delicious.</p>
+                    <p>We source only the freshest, locally-sourced ingredients to ensure every bite is an unforgettable experience.</p>
+                </div>
+                <div class="about-image">
+                    <img src="https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Restaurant Interior">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Menu Section -->
+    <section id="menu" class="menu">
+        <div class="container">
+            <div class="section-title text-center">
+                <h2>Signature Dishes</h2>
+                <div class="divider mx-auto"></div>
+                <p>Curated with passion and precision.</p>
+            </div>
+
+            <!-- Menu Filter Tabs -->
+            <div class="menu-tabs">
+                <button class="tab-btn active" data-filter="all" id="tab-all">All</button>
+                <button class="tab-btn" data-filter="starter" id="tab-starter">Starters</button>
+                <button class="tab-btn" data-filter="main" id="tab-main">Mains</button>
+                <button class="tab-btn" data-filter="dessert" id="tab-dessert">Desserts</button>
+            </div>
+
+            <div class="menu-grid" id="menuGrid">
+                <!-- STARTER 1 -->
+                <div class="menu-item" data-category="starter">
+                    <div class="menu-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1546549032-9571cd6b27df?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Burrata Salad">
+                        <span class="price">$18</span>
+                        <span class="category-tag">Starter</span>
+                    </div>
+                    <div class="menu-info">
+                        <h3>Burrata & Heirloom Tomato</h3>
+                        <p>Fresh burrata, heirloom tomatoes, basil oil, aged balsamic, fleur de sel.</p>
+                    </div>
+                </div>
+
+                <!-- STARTER 2 -->
+                <div class="menu-item" data-category="starter">
+                    <div class="menu-img-wrap">
+                        <img src="lobster_bisque.png" alt="Lobster Bisque">
+                        <span class="price">$22</span>
+                        <span class="category-tag">Starter</span>
+                    </div>
+                    <div class="menu-info">
+                        <h3>Lobster Bisque</h3>
+                        <p>Velvety lobster cream soup, tarragon crème fraîche, chive oil.</p>
+                    </div>
+                </div>
+
+                <!-- STARTER 3 -->
+                <div class="menu-item" data-category="starter">
+                    <div class="menu-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1559410545-0bdcd187e0a6?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Duck Liver Pate">
+                        <span class="price">$20</span>
+                        <span class="category-tag">Starter</span>
+                    </div>
+                    <div class="menu-info">
+                        <h3>Duck Liver Pâté</h3>
+                        <p>Silky duck pâté, brioche toast, fig jam, micro herbs.</p>
+                    </div>
+                </div>
+
+                <!-- MAIN 1 -->
+                <div class="menu-item" data-category="main">
+                    <div class="menu-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1600891964092-4316c288032e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Truffle Risotto">
+                        <span class="price">$32</span>
+                        <span class="category-tag">Main</span>
+                    </div>
+                    <div class="menu-info">
+                        <h3>Wild Mushroom Truffle Risotto</h3>
+                        <p>Arborio rice, porcini, black truffle shavings, aged parmesan.</p>
+                    </div>
+                </div>
+
+                <!-- MAIN 2 -->
+                <div class="menu-item" data-category="main">
+                    <div class="menu-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1544025162-d76694265947?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Seared Scallops">
+                        <span class="price">$38</span>
+                        <span class="category-tag">Main</span>
+                    </div>
+                    <div class="menu-info">
+                        <h3>Pan-Seared Scallops</h3>
+                        <p>Cauliflower purée, crispy pancetta, lemon herb butter.</p>
+                    </div>
+                </div>
+
+                <!-- MAIN 3 -->
+                <div class="menu-item" data-category="main">
+                    <div class="menu-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Wagyu Steak">
+                        <span class="price">$65</span>
+                        <span class="category-tag">Main</span>
+                    </div>
+                    <div class="menu-info">
+                        <h3>A5 Wagyu Ribeye</h3>
+                        <p>Roasted root vegetables, red wine jus, garlic confit.</p>
+                    </div>
+                </div>
+
+                <!-- MAIN 4 -->
+                <div class="menu-item" data-category="main">
+                    <div class="menu-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Salmon">
+                        <span class="price">$42</span>
+                        <span class="category-tag">Main</span>
+                    </div>
+                    <div class="menu-info">
+                        <h3>Atlantic Salmon en Croûte</h3>
+                        <p>Herb-crusted salmon, asparagus, beurre blanc, dill oil.</p>
+                    </div>
+                </div>
+
+                <!-- DESSERT 1 -->
+                <div class="menu-item" data-category="dessert">
+                    <div class="menu-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1579954115545-a95591f28bfc?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Chocolate Fondant">
+                        <span class="price">$16</span>
+                        <span class="category-tag">Dessert</span>
+                    </div>
+                    <div class="menu-info">
+                        <h3>Valrhona Chocolate Fondant</h3>
+                        <p>Warm dark chocolate lava cake, salted caramel ice cream, praline dust.</p>
+                    </div>
+                </div>
+
+                <!-- DESSERT 2 -->
+                <div class="menu-item" data-category="dessert">
+                    <div class="menu-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1488477181946-6428a0291777?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Creme Brulee">
+                        <span class="price">$14</span>
+                        <span class="category-tag">Dessert</span>
+                    </div>
+                    <div class="menu-info">
+                        <h3>Classic Crème Brûlée</h3>
+                        <p>Vanilla bean custard, caramelized sugar crust, fresh berries.</p>
+                    </div>
+                </div>
+
+                <!-- DESSERT 3 -->
+                <div class="menu-item" data-category="dessert">
+                    <div class="menu-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Mango Sorbet">
+                        <span class="price">$12</span>
+                        <span class="category-tag">Dessert</span>
+                    </div>
+                    <div class="menu-info">
+                        <h3>Alphonso Mango Sorbet</h3>
+                        <p>House-made mango sorbet, candied zest, passion fruit coulis.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reservation Section -->
+    <section id="reservation" class="reservation">
+        <div class="container">
+            <div class="reservation-box">
+                <div class="section-title text-center">
+                    <h2>Book a Table</h2>
+                    <div class="divider mx-auto"></div>
+                </div>
+                <form id="reservationForm" class="res-form">
+                    <div class="form-group">
+                        <input type="text" id="name" placeholder="Your Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="email" placeholder="Your Email" required>
+                    </div>
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <input type="date" id="date" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="time" id="time" required>
+                        </div>
+                        <div class="form-group">
+                            <select id="guests" required>
+                                <option value="" disabled selected>Guests</option>
+                                <option value="1">1 Person</option>
+                                <option value="2">2 People</option>
+                                <option value="3">3 People</option>
+                                <option value="4">4 People</option>
+                                <option value="5+">5+ People</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">Confirm Reservation</button>
+                    <div id="formMessage" class="form-message"></div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-grid">
+            <div class="footer-col">
+                <h3>Culinary Haven</h3>
+                <p>Elevating the art of dining through passion and perfection.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Contact Us</h4>
+                <p>123 Gourmet Street, Foodville</p>
+                <p>Phone: (555) 123-4567</p>
+                <p>Email: info@culinaryhaven.com</p>
+            </div>
+            <div class="footer-col">
+                <h4>Opening Hours</h4>
+                <p>Mon - Fri: 5:00 PM - 11:00 PM</p>
+                <p>Sat - Sun: 12:00 PM - 11:30 PM</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Culinary Haven. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
