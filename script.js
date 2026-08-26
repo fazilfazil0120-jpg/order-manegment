@@ -1,81 +1,245 @@
+// ============================================
+// === FIREBASE GOOGLE AUTHENTICATION ===
+// ============================================
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBNnkksE3WXGPrMbxwu_LYa0JogI-WDbOI",
+    authDomain: "order-manegment-1d33d.firebaseapp.com",
+    projectId: "order-manegment-1d33d",
+    storageBucket: "order-manegment-1d33d.firebasestorage.app",
+    messagingSenderId: "798117022683",
+    appId: "1:798117022683:web:56fee1f1f1cd79a6d435fe"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+// --- Dismiss Login Overlay ---
+function dismissLogin() {
+    const overlay = document.getElementById('loginOverlay');
+    overlay.classList.add('hidden');
+    document.body.style.overflow = '';
+}
+
+// --- Show User in Navbar ---
+function showUserInNav(user) {
+    const navUser = document.getElementById('navUser');
+    const navUserPhoto = document.getElementById('navUserPhoto');
+    const navUserName = document.getElementById('navUserName');
+    if (navUser && user) {
+        navUserPhoto.src = user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || 'User') + '&background=d4af37&color=000';
+        navUserName.textContent = user.displayName ? user.displayName.split(' ')[0] : 'User';
+        navUser.style.display = 'flex';
+    }
+}
+
+// --- Listen to Auth State ---
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        // Already signed in — dismiss login and show user
+        dismissLogin();
+        showUserInNav(user);
+    } else {
+        // Not signed in — show login overlay
+        document.body.style.overflow = 'hidden';
+    }
+});
+
+// --- Google Sign-In Button ---
+document.addEventListener('DOMContentLoaded', () => {
+    document.body.style.overflow = 'hidden'; // Block scroll until login
+
+    const googleLoginBtn = document.getElementById('googleLoginBtn');
+    const loginError = document.getElementById('loginError');
+
+    if (googleLoginBtn) {
+        googleLoginBtn.addEventListener('click', () => {
+            // Show loading state
+            googleLoginBtn.innerHTML = `<span style="display:flex;align-items:center;gap:10px;justify-content:center;">
+                <svg width="18" height="18" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg">
+                    <g fill="none" fill-rule="evenodd"><g transform="translate(1 1)" stroke-width="2">
+                    <circle stroke-opacity=".3" cx="18" cy="18" r="18"/><path d="M36 18c0-9.94-8.06-18-18-18" stroke="#d4af37"><animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"/></path></g></g>
+                </svg>Signing in...</span>`;
+            googleLoginBtn.disabled = true;
+            if (loginError) loginError.textContent = '';
+
+            // Firebase Google Sign-In Popup
+            auth.signInWithPopup(googleProvider)
+                .then((result) => {
+                    const user = result.user;
+                    dismissLogin();
+                    showUserInNav(user);
+                })
+                .catch((error) => {
+                    console.error('Sign-in error:', error);
+                    // Reset button
+                    googleLoginBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 48 48">
+                        <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.6 32.9 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/>
+                        <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
+                        <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.3 35.5 26.8 36 24 36c-5.2 0-9.5-3.1-11.3-7.5l-6.5 5C9.5 39.6 16.3 44 24 44z"/>
+                        <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.9 2.4-2.5 4.5-4.6 6l6.2 5.2C42 35.3 44 30 44 24c0-1.3-.1-2.6-.4-3.9z"/>
+                    </svg><span>Sign in with Google</span>`;
+                    googleLoginBtn.disabled = false;
+                    if (loginError) {
+                        loginError.textContent = error.code === 'auth/popup-closed-by-user'
+                            ? 'Popup closed. Please try again.'
+                            : 'Sign-in failed. Please try again.';
+                    }
+                });
+        });
+    }
+
+    // --- Sign Out Button ---
+    const signOutBtn = document.getElementById('signOutBtn');
+    if (signOutBtn) {
+        signOutBtn.addEventListener('click', () => {
+            auth.signOut().then(() => {
+                // Hide user from nav
+                document.getElementById('navUser').style.display = 'none';
+                // Show login overlay again
+                document.getElementById('loginOverlay').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            });
+        });
+    }
+});
+
+
 document.addEventListener('DOMContentLoaded', () => {
     
-    // --- Sticky Navbar ---
+    // --- State Management ---
+    let orderCart = [];
+    let currentStatus = 0; // 0: none, 1: preparing, 2: ready, 3: delivered
+    let statusInterval = null;
+
+    // --- View Navigation ---
+    const views = document.querySelectorAll('.view-section');
+    const navButtons = document.querySelectorAll('.nav-btn');
+    const navOrderFood = document.getElementById('nav-order-food');
+    const navBill = document.getElementById('nav-bill');
+
+    function switchView(targetId) {
+        views.forEach(view => {
+            view.classList.remove('active');
+            view.classList.add('hidden'); // Ensure it's hidden
+        });
+        
+        const targetView = document.getElementById(targetId);
+        if (targetView) {
+            targetView.classList.remove('hidden');
+            targetView.classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Update nav active state
+        navButtons.forEach(btn => {
+            if (btn.getAttribute('data-target') === targetId) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+
+    navButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = btn.getAttribute('data-target');
+            if (targetId) switchView(targetId);
+            
+            // Close mobile menu if open
+            if (hamburger.classList.contains('active')) {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+            }
+        });
+    });
+
+    // --- Navbar & Mobile Menu ---
     const navbar = document.getElementById('navbar');
-    
     window.addEventListener('scroll', () => {
         if (window.scrollY > 50) {
             navbar.classList.add('scrolled');
         } else {
-            navbar.classList.remove('scrolled');
+            // Keep it scrolled if we are not on home
+            const homeView = document.getElementById('home-view');
+            if (homeView.classList.contains('active')) {
+                navbar.classList.remove('scrolled');
+            }
         }
     });
 
-    // --- Mobile Menu Toggle ---
     const hamburger = document.getElementById('hamburger');
     const navLinks = document.querySelector('.nav-links');
-    const navItems = document.querySelectorAll('.nav-links li a');
 
     hamburger.addEventListener('click', () => {
         hamburger.classList.toggle('active');
         navLinks.classList.toggle('active');
     });
 
-    // Close mobile menu when clicking a link
-    navItems.forEach(item => {
-        item.addEventListener('click', () => {
-            hamburger.classList.remove('active');
-            navLinks.classList.remove('active');
-        });
-    });
-
-    // --- Smooth Scrolling for Anchor Links ---
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
+    // --- Reservation Form Handling ---
+    const reservationForm = document.getElementById('reservationForm');
+    const reservationBox = document.getElementById('reservationBox');
+    const bookingConfirmed = document.getElementById('bookingConfirmed');
+    
+    if (reservationForm) {
+        reservationForm.addEventListener('submit', (e) => {
             e.preventDefault();
             
-            const targetId = this.getAttribute('href');
-            if (targetId === '#') return;
+            const name = document.getElementById('name').value;
+            const date = document.getElementById('date').value;
+            const time = document.getElementById('time').value;
+            const guests = document.getElementById('guests').value;
             
-            const targetElement = document.querySelector(targetId);
-            
-            if (targetElement) {
-                // Adjust for fixed navbar
-                const navHeight = navbar.offsetHeight;
-                const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - navHeight;
+            if (name && date && time && guests) {
+                const submitBtn = reservationForm.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
                 
-                window.scrollTo({
-                    top: targetPosition,
-                    behavior: 'smooth'
-                });
+                submitBtn.textContent = 'Confirming...';
+                submitBtn.disabled = true;
+                
+                setTimeout(() => {
+                    // Hide form, show confirmation
+                    reservationBox.classList.add('hidden');
+                    bookingConfirmed.classList.remove('hidden');
+                    
+                    // Populate details
+                    document.getElementById('conf-name').textContent = name;
+                    document.getElementById('conf-table').textContent = Math.floor(Math.random() * 20) + 1; // Random table 1-20
+                    document.getElementById('conf-datetime').textContent = `${date} at ${time}`;
+                    document.getElementById('conf-guests').textContent = guests;
+                    
+                    // Show "Order Food" in nav
+                    navOrderFood.style.display = 'block';
+                    
+                }, 1000);
             }
         });
+    }
+
+    // Go to food page button
+    document.getElementById('goToFoodBtn').addEventListener('click', () => {
+        switchView('food-page');
     });
 
-    // --- Menu Category Filter ---
+    // --- Menu Filter ---
     const tabButtons = document.querySelectorAll('.tab-btn');
     const menuItems = document.querySelectorAll('.menu-item');
 
     tabButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-            // Update active tab style
             tabButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-
             const filter = btn.getAttribute('data-filter');
 
             menuItems.forEach(item => {
                 const category = item.getAttribute('data-category');
                 if (filter === 'all' || category === filter) {
-                    item.style.display = '';
-                    // Trigger a re-animation
+                    item.style.display = 'flex';
                     item.style.opacity = '0';
-                    item.style.transform = 'translateY(20px)';
-                    setTimeout(() => {
-                        item.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-                        item.style.opacity = '1';
-                        item.style.transform = 'translateY(0)';
-                    }, 50);
+                    setTimeout(() => item.style.opacity = '1', 50);
                 } else {
                     item.style.display = 'none';
                 }
@@ -83,45 +247,179 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- Reservation Form Handling ---
-    const reservationForm = document.getElementById('reservationForm');
-    const formMessage = document.getElementById('formMessage');
+    // --- Cart Logic ---
+    const addToCartBtns = document.querySelectorAll('.add-to-cart');
+    const cartCount = document.getElementById('cart-count');
 
-    if (reservationForm) {
-        reservationForm.addEventListener('submit', (e) => {
-            e.preventDefault();
+    addToCartBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const name = btn.getAttribute('data-name');
+            const price = parseFloat(btn.getAttribute('data-price'));
+            const type = btn.getAttribute('data-type'); // Main Dish or Side Dish
             
-            // Basic validation
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const date = document.getElementById('date').value;
-            const time = document.getElementById('time').value;
-            const guests = document.getElementById('guests').value;
+            orderCart.push({ name, price, type });
+            cartCount.textContent = orderCart.length;
             
-            if (name && email && date && time && guests) {
-                // Simulate form submission
-                const submitBtn = reservationForm.querySelector('button[type="submit"]');
-                const originalText = submitBtn.textContent;
-                
-                submitBtn.textContent = 'Processing...';
-                submitBtn.disabled = true;
-                
-                setTimeout(() => {
-                    formMessage.textContent = `Thank you, ${name}! Your table for ${guests} on ${date} at ${time} has been requested. We will email you a confirmation at ${email}.`;
-                    formMessage.style.color = 'var(--accent-color)';
-                    
-                    reservationForm.reset();
-                    submitBtn.textContent = originalText;
-                    submitBtn.disabled = false;
-                    
-                    // Clear message after 5 seconds
-                    setTimeout(() => {
-                        formMessage.textContent = '';
-                    }, 5000);
-                    
-                }, 1500);
-            }
+            // Visual feedback
+            const originalText = btn.textContent;
+            btn.textContent = 'Added ✓';
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline');
+            btn.style.backgroundColor = 'var(--accent-color)';
+            btn.style.color = '#000';
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.classList.add('btn-primary');
+                btn.classList.remove('btn-outline');
+                btn.style.backgroundColor = '';
+                btn.style.color = '';
+            }, 1000);
         });
-    }
+    });
 
+    // --- View Cart / Confirm Order ---
+    const viewCartBtn = document.getElementById('viewCartBtn');
+    const orderList = document.getElementById('orderList');
+    
+    viewCartBtn.addEventListener('click', () => {
+        if (orderCart.length === 0) {
+            alert('Please add some items to your order first.');
+            return;
+        }
+        
+        // Populate order list
+        orderList.innerHTML = '';
+        let total = 0;
+        
+        orderCart.forEach((item, index) => {
+            total += item.price;
+            orderList.innerHTML += `
+                <div class="order-item">
+                    <div>
+                        <span class="item-name">${item.name}</span>
+                        <span class="item-type">${item.type}</span>
+                    </div>
+                    <span class="item-price">₹${item.price.toFixed(2)}</span>
+                </div>
+            `;
+        });
+        
+        orderList.innerHTML += `
+            <div class="order-item" style="border-top: 2px solid var(--accent-color); margin-top: 10px;">
+                <span class="item-name">Total Estimated</span>
+                <span class="item-price">₹${total.toFixed(2)}</span>
+            </div>
+        `;
+        
+        switchView('food-confirm-page');
+    });
+    
+    document.getElementById('backToMenuBtn').addEventListener('click', () => {
+        switchView('food-page');
+    });
+
+    // --- Order Status ---
+    const confirmOrderBtn = document.getElementById('confirmOrderBtn');
+    const statusMessage = document.getElementById('statusMessage');
+    const stepPreparing = document.getElementById('step-preparing');
+    const stepReady = document.getElementById('step-ready');
+    const stepDelivered = document.getElementById('step-delivered');
+    const deliveryToast = document.getElementById('deliveryToast');
+
+    confirmOrderBtn.addEventListener('click', () => {
+        switchView('food-status-page');
+        
+        // Reset status
+        currentStatus = 1;
+        stepPreparing.classList.add('active');
+        stepReady.classList.remove('active');
+        stepDelivered.classList.remove('active');
+        statusMessage.textContent = 'Your food is being prepared with love!';
+        
+        // Simulate progress
+        setTimeout(() => {
+            currentStatus = 2;
+            stepReady.classList.add('active');
+            statusMessage.textContent = 'Your food is ready and on the way!';
+            
+            setTimeout(() => {
+                currentStatus = 3;
+                stepDelivered.classList.add('active');
+                statusMessage.textContent = 'Enjoy your meal!';
+                
+                // Show delivery toast
+                deliveryToast.classList.remove('hidden');
+                
+            }, 3000); // 3 seconds from Ready -> Delivered
+            
+        }, 3000); // 3 seconds from Preparing -> Ready
+    });
+
+    // --- Delivery Confirmation & Bill ---
+    const confirmReceiptBtn = document.getElementById('confirmReceiptBtn');
+    
+    confirmReceiptBtn.addEventListener('click', () => {
+        deliveryToast.classList.add('hidden');
+        navBill.style.display = 'block'; // Show bill in nav
+        generateBill();
+        switchView('bill-page');
+    });
+    
+    function generateBill() {
+        const billDetails = document.getElementById('billDetails');
+        let subtotal = 0;
+        
+        billDetails.innerHTML = '';
+        orderCart.forEach(item => {
+            subtotal += item.price;
+            billDetails.innerHTML += `
+                <div class="order-item">
+                    <div>
+                        <span class="item-name">${item.name}</span>
+                        <span class="item-type">${item.type}</span>
+                    </div>
+                    <span class="item-price">₹${item.price.toFixed(2)}</span>
+                </div>
+            `;
+        });
+        
+        const tax = subtotal * 0.10;
+        const grandTotal = subtotal + tax;
+        
+        document.getElementById('bill-subtotal').textContent = `₹${subtotal.toFixed(2)}`;
+        document.getElementById('bill-tax').textContent = `₹${tax.toFixed(2)}`;
+        document.getElementById('bill-total').textContent = `₹${grandTotal.toFixed(2)}`;
+    }
+    
+    // --- Pay Button ---
+    document.getElementById('payBtn').addEventListener('click', function() {
+        const originalText = this.textContent;
+        this.textContent = 'Processing...';
+        this.disabled = true;
+        
+        setTimeout(() => {
+            this.textContent = 'Payment Successful ✓';
+            this.style.backgroundColor = '#4CAF50';
+            this.style.color = '#fff';
+            
+            setTimeout(() => {
+                alert('Thank you for dining with Culinary Haven! See you next time.');
+                // Reset everything and go to home
+                orderCart = [];
+                cartCount.textContent = '0';
+                navOrderFood.style.display = 'none';
+                navBill.style.display = 'none';
+                reservationBox.classList.remove('hidden');
+                bookingConfirmed.classList.add('hidden');
+                reservationForm.reset();
+                this.textContent = originalText;
+                this.disabled = false;
+                this.style.backgroundColor = '';
+                this.style.color = '';
+                switchView('home-view');
+            }, 2000);
+            
+        }, 1500);
+    });
 });

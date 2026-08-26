@@ -3,25 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Culinary Haven | Premium Dining</title>
+    <title>Restaurant web | Premium Dining</title>
     <meta name="description" content="Experience premium dining at The Culinary Haven. Discover our exquisite menu and book a table today.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <!-- Firebase SDKs (CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 </head>
 <body>
 
+    <!-- ================= GOOGLE LOGIN OVERLAY ================= -->
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-card">
+            <div class="login-logo">🍽️</div>
+            <h1 class="login-title">Culinary Haven</h1>
+            <p class="login-subtitle">Sign in to book a table &amp; order food</p>
+            <div class="login-divider"></div>
+
+            <button class="google-btn" id="googleLoginBtn">
+                <svg width="20" height="20" viewBox="0 0 48 48">
+                    <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.6 32.9 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/>
+                    <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
+                    <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.3 35.5 26.8 36 24 36c-5.2 0-9.5-3.1-11.3-7.5l-6.5 5C9.5 39.6 16.3 44 24 44z"/>
+                    <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.9 2.4-2.5 4.5-4.6 6l6.2 5.2C42 35.3 44 30 44 24c0-1.3-.1-2.6-.4-3.9z"/>
+                </svg>
+                <span>Sign in with Google</span>
+            </button>
+
+            <div id="loginError" class="login-error"></div>
+            <p class="login-note">By signing in, you agree to our terms of service.</p>
+        </div>
+    </div>
+
     <!-- Navigation -->
-    <nav class="navbar" id="navbar">
+    <nav class="navbar scrolled" id="navbar">
         <div class="nav-container">
-            <a href="#" class="logo">Culinary Haven</a>
+            <a href="#" class="logo" id="nav-logo">Culinary Haven</a>
             <ul class="nav-links">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#menu">Menu</a></li>
-                <li><a href="#reservation">Reservation</a></li>
+                <li><a href="#" class="nav-btn" data-target="home-view">Home</a></li>
+                <li><a href="#" class="nav-btn" data-target="food-page" id="nav-order-food" style="display:none;">Order Food</a></li>
+                <li><a href="#" class="nav-btn" data-target="bill-page" id="nav-bill" style="display:none;">Bill</a></li>
             </ul>
+            <!-- User Profile in Navbar -->
+            <div class="nav-user" id="navUser" style="display:none;">
+                <img id="navUserPhoto" src="" alt="User" class="nav-user-photo">
+                <span id="navUserName" class="nav-user-name"></span>
+                <button id="signOutBtn" class="btn-signout">Sign Out</button>
+            </div>
             <div class="hamburger" id="hamburger">
                 <span></span>
                 <span></span>
@@ -30,223 +61,311 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section id="home" class="hero">
-        <div class="hero-content">
-            <h1>Savor the Art of <br><span class="highlight">Fine Dining</span></h1>
-            <p>A symphony of flavors awaits you. Experience culinary perfection in an elegant atmosphere.</p>
-            <a href="#menu" class="btn btn-primary">Explore Menu</a>
+    <!-- VIEWS CONTAINER -->
+    <main id="app-container">
+        
+        <!-- ================= HOME VIEW ================= -->
+        <div id="home-view" class="view-section active">
+            <!-- Hero Section -->
+            <section id="home" class="hero">
+                <div class="hero-content">
+                    <h1>Savor the Art of <br><span class="highlight">Fine Dining</span></h1>
+                    <p>A symphony of flavors awaits you. Experience culinary perfection in an elegant atmosphere.</p>
+                    <a href="#reservation" class="btn btn-primary">Book a Table</a>
+                </div>
+                <div class="hero-overlay"></div>
+            </section>
+
+            <!-- About Section -->
+            <section id="about" class="about">
+                <div class="container">
+                    <div class="about-grid">
+                        <div class="about-text">
+                            <h2>Our Story</h2>
+                            <div class="divider"></div>
+                            <p>Founded in 2010, The Culinary Haven has been a beacon of gastronomic excellence. Our passionate chefs blend traditional techniques with modern innovation to create dishes that are as visually stunning as they are delicious.</p>
+                            <p>We source only the freshest, locally-sourced ingredients to ensure every bite is an unforgettable experience.</p>
+                        </div>
+                        <div class="about-image">
+                            <img src="https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Restaurant Interior">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reservation Section -->
+            <section id="reservation" class="reservation">
+                <div class="container">
+                    <div class="reservation-box" id="reservationBox">
+                        <div class="section-title text-center">
+                            <h2>Book a Table</h2>
+                            <div class="divider mx-auto"></div>
+                        </div>
+                        <form id="reservationForm" class="res-form">
+                            <div class="form-group">
+                                <input type="text" id="name" placeholder="Your Name" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="email" id="email" placeholder="Your Email" required>
+                            </div>
+                            <div class="form-group-row">
+                                <div class="form-group">
+                                    <input type="date" id="date" required>
+                                </div>
+                                <div class="form-group">
+                                    <input type="time" id="time" required>
+                                </div>
+                                <div class="form-group">
+                                    <select id="guests" required>
+                                        <option value="" disabled selected>Guests</option>
+                                        <option value="1">1 Person</option>
+                                        <option value="2">2 People</option>
+                                        <option value="3">3 People</option>
+                                        <option value="4">4 People</option>
+                                        <option value="5+">5+ People</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-full">Confirm Reservation</button>
+                            <div id="formMessage" class="form-message"></div>
+                        </form>
+                    </div>
+                    
+                    <!-- Booking Confirmed Card (Hidden initially) -->
+                    <div class="booking-confirmed hidden" id="bookingConfirmed">
+                        <div class="success-icon">✅</div>
+                        <h2>Table Confirmed!</h2>
+                        <div class="booking-details">
+                            <p><strong>Name:</strong> <span id="conf-name"></span></p>
+                            <p><strong>Table No:</strong> <span id="conf-table"></span></p>
+                            <p><strong>Date & Time:</strong> <span id="conf-datetime"></span></p>
+                            <p><strong>Guests:</strong> <span id="conf-guests"></span></p>
+                        </div>
+                        <button id="goToFoodBtn" class="btn btn-primary mt-20">Order Food →</button>
+                    </div>
+                </div>
+            </section>
         </div>
-        <div class="hero-overlay"></div>
-    </section>
 
-    <!-- About Section -->
-    <section id="about" class="about">
-        <div class="container">
-            <div class="about-grid">
-                <div class="about-text">
-                    <h2>Our Story</h2>
-                    <div class="divider"></div>
-                    <p>Founded in 2010, The Culinary Haven has been a beacon of gastronomic excellence. Our passionate chefs blend traditional techniques with modern innovation to create dishes that are as visually stunning as they are delicious.</p>
-                    <p>We source only the freshest, locally-sourced ingredients to ensure every bite is an unforgettable experience.</p>
+        <!-- ================= FOOD PAGE VIEW ================= -->
+        <div id="food-page" class="view-section hidden">
+            <section class="menu pt-120">
+                <div class="container">
+                    <div class="section-title text-center">
+                        <h2>Order Food</h2>
+                        <div class="divider mx-auto"></div>
+                        <p>Select your favorite dishes.</p>
+                    </div>
+                    
+                    <div class="cart-summary-bar">
+                        <span>Items in Order: <strong id="cart-count">0</strong></span>
+                        <button id="viewCartBtn" class="btn btn-primary">View Order</button>
+                    </div>
+
+                    <!-- Menu Filter Tabs -->
+                    <div class="menu-tabs">
+                        <button class="tab-btn active" data-filter="all">All</button>
+                        <button class="tab-btn" data-filter="starter">Starters</button>
+                        <button class="tab-btn" data-filter="main">Mains</button>
+                        <button class="tab-btn" data-filter="dessert">Desserts</button>
+                    </div>
+
+                    <div class="menu-grid" id="menuGrid">
+                        <!-- Items generated by JS or static -->
+                        <div class="menu-item" data-category="starter">
+                            <div class="menu-img-wrap">
+                                <img src="https://images.unsplash.com/photo-1567620832903-9fc6debc209f?w=600&q=80" alt="Chicken 65">
+                                <span class="price">₹12</span>
+                                <span class="category-tag dish-side">Side Dish</span>
+                            </div>
+                            <div class="menu-info">
+                                <h3>Chicken 65</h3>
+                                <p>Spicy, deep-fried chicken bites marinated with fiery Tamil spices and curry leaves.</p>
+                                <button class="btn btn-primary btn-sm add-to-cart" data-name="Chicken 65" data-price="12" data-type="Side Dish">Add to Order</button>
+                            </div>
+                        </div>
+
+                        <div class="menu-item" data-category="starter">
+                            <div class="menu-img-wrap">
+                                <img src="https://images.unsplash.com/photo-1574484284002-952d92456975?w=600&q=80" alt="Mutton Chukka">
+                                <span class="price">₹16</span>
+                                <span class="category-tag dish-side">Side Dish</span>
+                            </div>
+                            <div class="menu-info">
+                                <h3>Madurai Mutton Chukka</h3>
+                                <p>Tender mutton pan-roasted with freshly ground pepper and shallots.</p>
+                                <button class="btn btn-primary btn-sm add-to-cart" data-name="Madurai Mutton Chukka" data-price="16" data-type="Side Dish">Add to Order</button>
+                            </div>
+                        </div>
+
+                        <div class="menu-item" data-category="main">
+                            <div class="menu-img-wrap">
+                                <img src="Chettinad Chicken Biryani.jpg" alt="Chettinad Biryani">
+                                <span class="price">₹22</span>
+                                <span class="category-tag dish-main">Main Dish</span>
+                            </div>
+                            <div class="menu-info">
+                                <h3>Chettinad Chicken Biryani</h3>
+                                <p>Aromatic seeraga samba rice cooked with authentic Chettinad spices and tender chicken.</p>
+                                <button class="btn btn-primary btn-sm add-to-cart" data-name="Chettinad Chicken Biryani" data-price="22" data-type="Main Dish">Add to Order</button>
+                            </div>
+                        </div>
+
+                        <div class="menu-item" data-category="main">
+                            <div class="menu-img-wrap">
+                                <img src="Nanjil Meen Kuzhambu.webp" alt="Meen Kuzhambu">
+                                <span class="price">₹24</span>
+                                <span class="category-tag dish-main">Main Dish</span>
+                            </div>
+                            <div class="menu-info">
+                                <h3>Nanjil Meen Kuzhambu</h3>
+                                <p>Traditional Kanyakumari style spicy and tangy fish curry made with tamarind and coconut.</p>
+                                <button class="btn btn-primary btn-sm add-to-cart" data-name="Nanjil Meen Kuzhambu" data-price="24" data-type="Main Dish">Add to Order</button>
+                            </div>
+                        </div>
+                        <div class="menu-item" data-category="starter">
+                            <div class="menu-img-wrap">
+                                <img src="https://images.unsplash.com/photo-1630409351241-e90c9c185a02?w=600&q=80" alt="Idli Sambar">
+                                <span class="price">₹10</span>
+                                <span class="category-tag dish-side">Side Dish</span>
+                            </div>
+                            <div class="menu-info">
+                                <h3>Idli Sambar</h3>
+                                <p>Steamed rice cakes served with hot, flavorful lentil stew and coconut chutney.</p>
+                                <button class="btn btn-primary btn-sm add-to-cart" data-name="Idli Sambar" data-price="10" data-type="Side Dish">Add to Order</button>
+                            </div>
+                        </div>
+
+                        <div class="menu-item" data-category="main">
+                            <div class="menu-img-wrap">
+                                <img src="masala-dosa.jpg" alt="Masala Dosa">
+                                <span class="price">₹15</span>
+                                <span class="category-tag dish-main">Main Dish</span>
+                            </div>
+                            <div class="menu-info">
+                                <h3>Masala Dosa</h3>
+                                <p>Crispy fermented crepe made from rice batter, filled with a savory potato curry.</p>
+                                <button class="btn btn-primary btn-sm add-to-cart" data-name="Masala Dosa" data-price="15" data-type="Main Dish">Add to Order</button>
+                            </div>
+                        </div>
+
+                        <div class="menu-item" data-category="dessert">
+                            <div class="menu-img-wrap">
+                                <img src="https://images.unsplash.com/photo-1609541772874-46d7f1e89c9d?w=600&q=80" alt="Payasam">
+                                <span class="price">₹8</span>
+                                <span class="category-tag dish-side">Side Dish</span>
+                            </div>
+                            <div class="menu-info">
+                                <h3>r PayasamElanee</h3>
+                                <p>Rich and creamy dessert made with tender coconut water, milk, and cardamom.</p>
+                                <button class="btn btn-primary btn-sm add-to-cart" data-name="Elaneer Payasam" data-price="8" data-type="Side Dish">Add to Order</button>
+                            </div>
+                        </div>
+                        
+                        <div class="menu-item" data-category="dessert">
+                            <div class="menu-img-wrap">
+                                <img src="https://images.unsplash.com/photo-1504627298434-2a5be82a9484?w=600&q=80" alt="Filter Coffee">
+                                <span class="price">₹5</span>
+                                <span class="category-tag dish-side">Side Dish</span>
+                            </div>
+                            <div class="menu-info">
+                                <h3>Filter Coffee</h3>
+                                <p>Authentic South Indian frothy filter coffee served in a traditional dabarah.</p>
+                                <button class="btn btn-primary btn-sm add-to-cart" data-name="Filter Coffee" data-price="5" data-type="Side Dish">Add to Order</button>
+                            </div>
+                        </div>
+
+                        <div class="menu-item" data-category="main">
+                            <div class="menu-img-wrap">
+                                <img src="https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Mystery Dish">
+                                <span class="price">₹100</span>
+                                <span class="category-tag dish-main">Main Dish</span>
+                            </div>
+                            <div class="menu-info">
+                                <h3>Mystery Dish (Test)</h3>
+                                <p>This dish is meant to test what happens when an image is not supported or fails to load!</p>
+                                <button class="btn btn-primary btn-sm add-to-cart" data-name="Mystery Dish" data-price="100" data-type="Main Dish">Add to Order</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="about-image">
-                    <img src="https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Restaurant Interior">
-                </div>
-            </div>
+            </section>
         </div>
-    </section>
 
-    <!-- Menu Section -->
-    <section id="menu" class="menu">
-        <div class="container">
-            <div class="section-title text-center">
-                <h2>Signature Dishes</h2>
-                <div class="divider mx-auto"></div>
-                <p>Curated with passion and precision.</p>
-            </div>
-
-            <!-- Menu Filter Tabs -->
-            <div class="menu-tabs">
-                <button class="tab-btn active" data-filter="all" id="tab-all">All</button>
-                <button class="tab-btn" data-filter="starter" id="tab-starter">Starters</button>
-                <button class="tab-btn" data-filter="main" id="tab-main">Mains</button>
-                <button class="tab-btn" data-filter="dessert" id="tab-dessert">Desserts</button>
-            </div>
-
-            <div class="menu-grid" id="menuGrid">
-                <!-- STARTER 1 -->
-                <div class="menu-item" data-category="starter">
-                    <div class="menu-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1546549032-9571cd6b27df?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Burrata Salad">
-                        <span class="price">$18</span>
-                        <span class="category-tag">Starter</span>
+        <!-- ================= FOOD CONFIRM PAGE VIEW ================= -->
+        <div id="food-confirm-page" class="view-section hidden">
+            <div class="container pt-120">
+                <div class="box-container">
+                    <div class="section-title text-center">
+                        <h2>Order Summary</h2>
+                        <div class="divider mx-auto"></div>
                     </div>
-                    <div class="menu-info">
-                        <h3>Burrata & Heirloom Tomato</h3>
-                        <p>Fresh burrata, heirloom tomatoes, basil oil, aged balsamic, fleur de sel.</p>
+                    
+                    <div class="order-list" id="orderList">
+                        <!-- Order items will be populated here -->
                     </div>
-                </div>
-
-                <!-- STARTER 2 -->
-                <div class="menu-item" data-category="starter">
-                    <div class="menu-img-wrap">
-                        <img src="lobster_bisque.png" alt="Lobster Bisque">
-                        <span class="price">$22</span>
-                        <span class="category-tag">Starter</span>
-                    </div>
-                    <div class="menu-info">
-                        <h3>Lobster Bisque</h3>
-                        <p>Velvety lobster cream soup, tarragon crème fraîche, chive oil.</p>
-                    </div>
-                </div>
-
-                <!-- STARTER 3 -->
-                <div class="menu-item" data-category="starter">
-                    <div class="menu-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1559410545-0bdcd187e0a6?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Duck Liver Pate">
-                        <span class="price">$20</span>
-                        <span class="category-tag">Starter</span>
-                    </div>
-                    <div class="menu-info">
-                        <h3>Duck Liver Pâté</h3>
-                        <p>Silky duck pâté, brioche toast, fig jam, micro herbs.</p>
-                    </div>
-                </div>
-
-                <!-- MAIN 1 -->
-                <div class="menu-item" data-category="main">
-                    <div class="menu-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1600891964092-4316c288032e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Truffle Risotto">
-                        <span class="price">$32</span>
-                        <span class="category-tag">Main</span>
-                    </div>
-                    <div class="menu-info">
-                        <h3>Wild Mushroom Truffle Risotto</h3>
-                        <p>Arborio rice, porcini, black truffle shavings, aged parmesan.</p>
-                    </div>
-                </div>
-
-                <!-- MAIN 2 -->
-                <div class="menu-item" data-category="main">
-                    <div class="menu-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1544025162-d76694265947?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Seared Scallops">
-                        <span class="price">$38</span>
-                        <span class="category-tag">Main</span>
-                    </div>
-                    <div class="menu-info">
-                        <h3>Pan-Seared Scallops</h3>
-                        <p>Cauliflower purée, crispy pancetta, lemon herb butter.</p>
-                    </div>
-                </div>
-
-                <!-- MAIN 3 -->
-                <div class="menu-item" data-category="main">
-                    <div class="menu-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Wagyu Steak">
-                        <span class="price">$65</span>
-                        <span class="category-tag">Main</span>
-                    </div>
-                    <div class="menu-info">
-                        <h3>A5 Wagyu Ribeye</h3>
-                        <p>Roasted root vegetables, red wine jus, garlic confit.</p>
-                    </div>
-                </div>
-
-                <!-- MAIN 4 -->
-                <div class="menu-item" data-category="main">
-                    <div class="menu-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Salmon">
-                        <span class="price">$42</span>
-                        <span class="category-tag">Main</span>
-                    </div>
-                    <div class="menu-info">
-                        <h3>Atlantic Salmon en Croûte</h3>
-                        <p>Herb-crusted salmon, asparagus, beurre blanc, dill oil.</p>
-                    </div>
-                </div>
-
-                <!-- DESSERT 1 -->
-                <div class="menu-item" data-category="dessert">
-                    <div class="menu-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1579954115545-a95591f28bfc?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Chocolate Fondant">
-                        <span class="price">$16</span>
-                        <span class="category-tag">Dessert</span>
-                    </div>
-                    <div class="menu-info">
-                        <h3>Valrhona Chocolate Fondant</h3>
-                        <p>Warm dark chocolate lava cake, salted caramel ice cream, praline dust.</p>
-                    </div>
-                </div>
-
-                <!-- DESSERT 2 -->
-                <div class="menu-item" data-category="dessert">
-                    <div class="menu-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1488477181946-6428a0291777?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Creme Brulee">
-                        <span class="price">$14</span>
-                        <span class="category-tag">Dessert</span>
-                    </div>
-                    <div class="menu-info">
-                        <h3>Classic Crème Brûlée</h3>
-                        <p>Vanilla bean custard, caramelized sugar crust, fresh berries.</p>
-                    </div>
-                </div>
-
-                <!-- DESSERT 3 -->
-                <div class="menu-item" data-category="dessert">
-                    <div class="menu-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Mango Sorbet">
-                        <span class="price">$12</span>
-                        <span class="category-tag">Dessert</span>
-                    </div>
-                    <div class="menu-info">
-                        <h3>Alphonso Mango Sorbet</h3>
-                        <p>House-made mango sorbet, candied zest, passion fruit coulis.</p>
+                    
+                    <div class="order-actions mt-20">
+                        <button id="backToMenuBtn" class="btn btn-outline">Back to Menu</button>
+                        <button id="confirmOrderBtn" class="btn btn-primary">Confirm Order</button>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
 
-    <!-- Reservation Section -->
-    <section id="reservation" class="reservation">
-        <div class="container">
-            <div class="reservation-box">
-                <div class="section-title text-center">
-                    <h2>Book a Table</h2>
+        <!-- ================= FOOD STATUS PAGE VIEW ================= -->
+        <div id="food-status-page" class="view-section hidden">
+            <div class="container pt-120">
+                <div class="box-container text-center">
+                    <h2>Order Status</h2>
                     <div class="divider mx-auto"></div>
+                    
+                    <div class="status-tracker">
+                        <div class="step" id="step-preparing">
+                            <div class="step-icon">🍳</div>
+                            <p>Preparing</p>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step" id="step-ready">
+                            <div class="step-icon">🛎️</div>
+                            <p>Ready</p>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step" id="step-delivered">
+                            <div class="step-icon">🍽️</div>
+                            <p>Delivered</p>
+                        </div>
+                    </div>
+                    <p class="status-message mt-20" id="statusMessage">Your food is being prepared with love!</p>
                 </div>
-                <form id="reservationForm" class="res-form">
-                    <div class="form-group">
-                        <input type="text" id="name" placeholder="Your Name" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="email" id="email" placeholder="Your Email" required>
-                    </div>
-                    <div class="form-group-row">
-                        <div class="form-group">
-                            <input type="date" id="date" required>
-                        </div>
-                        <div class="form-group">
-                            <input type="time" id="time" required>
-                        </div>
-                        <div class="form-group">
-                            <select id="guests" required>
-                                <option value="" disabled selected>Guests</option>
-                                <option value="1">1 Person</option>
-                                <option value="2">2 People</option>
-                                <option value="3">3 People</option>
-                                <option value="4">4 People</option>
-                                <option value="5+">5+ People</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-full">Confirm Reservation</button>
-                    <div id="formMessage" class="form-message"></div>
-                </form>
             </div>
         </div>
-    </section>
+
+        <!-- ================= BILL PAGE VIEW ================= -->
+        <div id="bill-page" class="view-section hidden">
+            <div class="container pt-120">
+                <div class="box-container">
+                    <div class="section-title text-center">
+                        <h2>Your Bill</h2>
+                        <div class="divider mx-auto"></div>
+                    </div>
+                    
+                    <div class="bill-details" id="billDetails">
+                        <!-- Bill items -->
+                    </div>
+                    
+                    <div class="bill-summary mt-20">
+                        <div class="bill-row"><span>Subtotal:</span> <span id="bill-subtotal">₹0</span></div>
+                        <div class="bill-row"><span>Tax (10%):</span> <span id="bill-tax">₹0</span></div>
+                        <div class="bill-row grand-total"><span>Grand Total:</span> <span id="bill-total">₹0</span></div>
+                    </div>
+                    
+                    <button class="btn btn-primary btn-full mt-20" id="payBtn">Pay Now</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
 
     <!-- Footer -->
     <footer class="footer">
@@ -261,16 +380,20 @@
                 <p>Phone: (555) 123-4567</p>
                 <p>Email: info@culinaryhaven.com</p>
             </div>
-            <div class="footer-col">
-                <h4>Opening Hours</h4>
-                <p>Mon - Fri: 5:00 PM - 11:00 PM</p>
-                <p>Sat - Sun: 12:00 PM - 11:30 PM</p>
-            </div>
         </div>
         <div class="footer-bottom">
             <p>&copy; 2024 Culinary Haven. All rights reserved.</p>
         </div>
     </footer>
+
+    <!-- Delivery Toast Notification -->
+    <div class="toast-notification hidden" id="deliveryToast">
+        <div class="toast-content">
+            <h3>🍽️ Food Delivered!</h3>
+            <p>Your food has arrived at your table.</p>
+            <button id="confirmReceiptBtn" class="btn btn-primary btn-sm mt-10">Confirm Receipt</button>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
