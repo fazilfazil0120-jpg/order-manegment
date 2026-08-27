@@ -288,6 +288,68 @@ p {
     font-size: 0.85rem;
 }
 
+/* === QTY +/- CONTROL === */
+.qty-control {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border: 2px solid rgba(212,175,55,0.35);
+    border-radius: 50px;
+    overflow: hidden;
+    width: fit-content;
+    transition: border-color 0.3s ease;
+}
+.qty-control.has-items {
+    border-color: var(--accent-color);
+}
+.qty-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    font-size: 1.3rem;
+    font-weight: 700;
+    width: 38px;
+    height: 38px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+.qty-btn:hover:not(:disabled) {
+    background: var(--accent-color);
+    color: #000;
+}
+.qty-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+.qty-btn.qty-plus {
+    background: var(--accent-color);
+    color: #000;
+}
+.qty-btn.qty-plus:hover {
+    background: var(--accent-hover);
+}
+.qty-display {
+    min-width: 34px;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    padding: 0 4px;
+    transition: transform 0.15s ease;
+}
+@keyframes qtyPulse {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.4); }
+    100% { transform: scale(1); }
+}
+.qty-pulse {
+    animation: qtyPulse 0.3s ease;
+}
+
 .btn-primary {
     background-color: var(--accent-color);
     color: #000;
@@ -748,6 +810,57 @@ input:focus, select:focus {
 .item-price {
     color: var(--accent-color);
     font-weight: bold;
+    font-size: 1rem;
+}
+
+/* === ORDER CATEGORY GROUPING === */
+.order-category-header {
+    background: rgba(212, 175, 55, 0.12);
+    border-left: 3px solid var(--accent-color);
+    padding: 8px 14px;
+    border-radius: 6px;
+    margin: 14px 0 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--accent-color);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.order-item-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.order-item-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.item-qty-badge {
+    background: var(--accent-color);
+    color: #000;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 20px;
+}
+
+.item-unit-price {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.order-total-row {
+    border-top: 2px solid var(--accent-color) !important;
+    margin-top: 10px;
+    padding-top: 16px !important;
+    background: rgba(212, 175, 55, 0.06);
+    border-radius: 0 0 8px 8px;
+    font-size: 1.1rem;
 }
 
 .order-actions {

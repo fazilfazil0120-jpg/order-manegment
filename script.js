@@ -247,34 +247,63 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- Cart Logic ---
+    // --- Cart Logic: Replace buttons with +/- qty controls ---
     const addToCartBtns = document.querySelectorAll('.add-to-cart');
     const cartCount = document.getElementById('cart-count');
 
     addToCartBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const name = btn.getAttribute('data-name');
-            const price = parseFloat(btn.getAttribute('data-price'));
-            const type = btn.getAttribute('data-type'); // Main Dish or Side Dish
-            
+        const name  = btn.getAttribute('data-name');
+        const price = parseFloat(btn.getAttribute('data-price'));
+        const type  = btn.getAttribute('data-type');
+
+        // Build qty control widget
+        const qtyControl = document.createElement('div');
+        qtyControl.className = 'qty-control';
+        qtyControl.innerHTML = `
+            <button class="qty-btn qty-minus" disabled aria-label="Remove one">−</button>
+            <span class="qty-display">0</span>
+            <button class="qty-btn qty-plus" aria-label="Add one">+</button>
+        `;
+
+        // Replace old button with new widget
+        btn.parentNode.replaceChild(qtyControl, btn);
+
+        const minusBtn = qtyControl.querySelector('.qty-minus');
+        const plusBtn  = qtyControl.querySelector('.qty-plus');
+        const display  = qtyControl.querySelector('.qty-display');
+        let qty = 0;
+
+        // + button
+        plusBtn.addEventListener('click', () => {
+            qty++;
+            display.textContent = qty;
+            minusBtn.disabled = false;
+            qtyControl.classList.add('has-items');
             orderCart.push({ name, price, type });
             cartCount.textContent = orderCart.length;
-            
-            // Visual feedback
-            const originalText = btn.textContent;
-            btn.textContent = 'Added ✓';
-            btn.classList.remove('btn-primary');
-            btn.classList.add('btn-outline');
-            btn.style.backgroundColor = 'var(--accent-color)';
-            btn.style.color = '#000';
-            
-            setTimeout(() => {
-                btn.textContent = originalText;
-                btn.classList.add('btn-primary');
-                btn.classList.remove('btn-outline');
-                btn.style.backgroundColor = '';
-                btn.style.color = '';
-            }, 1000);
+
+            // Pulse animation
+            display.classList.add('qty-pulse');
+            setTimeout(() => display.classList.remove('qty-pulse'), 300);
+        });
+
+        // − button
+        minusBtn.addEventListener('click', () => {
+            if (qty > 0) {
+                qty--;
+                display.textContent = qty;
+                if (qty === 0) {
+                    minusBtn.disabled = true;
+                    qtyControl.classList.remove('has-items');
+                }
+                // Remove one matching item from cart
+                const idx = orderCart.findIndex(item => item.name === name);
+                if (idx !== -1) orderCart.splice(idx, 1);
+                cartCount.textContent = orderCart.length;
+
+                display.classList.add('qty-pulse');
+                setTimeout(() => display.classList.remove('qty-pulse'), 300);
+            }
         });
     });
 
@@ -287,33 +316,67 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Please add some items to your order first.');
             return;
         }
-        
-        // Populate order list
+
+        // --- Group items by name to count quantity ---
+        const groupedItems = {};
+        orderCart.forEach(item => {
+            const key = item.name;
+            if (groupedItems[key]) {
+                groupedItems[key].qty += 1;
+                groupedItems[key].subtotal += item.price;
+            } else {
+                groupedItems[key] = { ...item, qty: 1, subtotal: item.price };
+            }
+        });
+
+        // --- Group by Category ---
+        const byCategory = {};
+        Object.values(groupedItems).forEach(item => {
+            const cat = item.type; // "Main Dish" or "Side Dish"
+            if (!byCategory[cat]) byCategory[cat] = [];
+            byCategory[cat].push(item);
+        });
+
+        // --- Render grouped order list ---
         orderList.innerHTML = '';
         let total = 0;
-        
-        orderCart.forEach((item, index) => {
-            total += item.price;
+
+        Object.keys(byCategory).forEach(category => {
+            // Category header
             orderList.innerHTML += `
-                <div class="order-item">
-                    <div>
-                        <span class="item-name">${item.name}</span>
-                        <span class="item-type">${item.type}</span>
-                    </div>
-                    <span class="item-price">₹${item.price.toFixed(2)}</span>
+                <div class="order-category-header">
+                    <span>${category === 'Main Dish' ? '🍛' : '🥗'} ${category}</span>
                 </div>
             `;
+
+            byCategory[category].forEach(item => {
+                total += item.subtotal;
+                orderList.innerHTML += `
+                    <div class="order-item">
+                        <div class="order-item-left">
+                            <span class="item-name">${item.name}</span>
+                            <span class="item-qty-badge">x${item.qty}</span>
+                        </div>
+                        <div class="order-item-right">
+                            <span class="item-unit-price">₹${item.price.toFixed(0)} each</span>
+                            <span class="item-price">₹${item.subtotal.toFixed(2)}</span>
+                        </div>
+                    </div>
+                `;
+            });
         });
-        
+
+        // --- Total Row ---
         orderList.innerHTML += `
-            <div class="order-item" style="border-top: 2px solid var(--accent-color); margin-top: 10px;">
-                <span class="item-name">Total Estimated</span>
+            <div class="order-item order-total-row">
+                <span class="item-name">Total Items: ${orderCart.length}</span>
                 <span class="item-price">₹${total.toFixed(2)}</span>
             </div>
         `;
-        
+
         switchView('food-confirm-page');
     });
+
     
     document.getElementById('backToMenuBtn').addEventListener('click', () => {
         switchView('food-page');
@@ -369,24 +432,55 @@ document.addEventListener('DOMContentLoaded', () => {
     function generateBill() {
         const billDetails = document.getElementById('billDetails');
         let subtotal = 0;
-        
+
         billDetails.innerHTML = '';
+
+        // --- Group items by name ---
+        const groupedItems = {};
         orderCart.forEach(item => {
-            subtotal += item.price;
+            if (groupedItems[item.name]) {
+                groupedItems[item.name].qty += 1;
+                groupedItems[item.name].subtotal += item.price;
+            } else {
+                groupedItems[item.name] = { ...item, qty: 1, subtotal: item.price };
+            }
+        });
+
+        // --- Group by Category ---
+        const byCategory = {};
+        Object.values(groupedItems).forEach(item => {
+            const cat = item.type;
+            if (!byCategory[cat]) byCategory[cat] = [];
+            byCategory[cat].push(item);
+        });
+
+        // --- Render Bill Items ---
+        Object.keys(byCategory).forEach(category => {
             billDetails.innerHTML += `
-                <div class="order-item">
-                    <div>
-                        <span class="item-name">${item.name}</span>
-                        <span class="item-type">${item.type}</span>
-                    </div>
-                    <span class="item-price">₹${item.price.toFixed(2)}</span>
+                <div class="order-category-header">
+                    <span>${category === 'Main Dish' ? '🍛' : '🥗'} ${category}</span>
                 </div>
             `;
+            byCategory[category].forEach(item => {
+                subtotal += item.subtotal;
+                billDetails.innerHTML += `
+                    <div class="order-item">
+                        <div class="order-item-left">
+                            <span class="item-name">${item.name}</span>
+                            <span class="item-qty-badge">x${item.qty}</span>
+                        </div>
+                        <div class="order-item-right">
+                            <span class="item-unit-price">₹${item.price.toFixed(0)} × ${item.qty}</span>
+                            <span class="item-price">₹${item.subtotal.toFixed(2)}</span>
+                        </div>
+                    </div>
+                `;
+            });
         });
-        
+
         const tax = subtotal * 0.10;
         const grandTotal = subtotal + tax;
-        
+
         document.getElementById('bill-subtotal').textContent = `₹${subtotal.toFixed(2)}`;
         document.getElementById('bill-tax').textContent = `₹${tax.toFixed(2)}`;
         document.getElementById('bill-total').textContent = `₹${grandTotal.toFixed(2)}`;
