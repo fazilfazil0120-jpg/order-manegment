@@ -14,6 +14,7 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
+const db   = firebase.firestore();   // ← Firestore instance
 const googleProvider = new firebase.auth.GoogleAuthProvider();
 
 // --- Dismiss Login Overlay ---
@@ -390,32 +391,94 @@ document.addEventListener('DOMContentLoaded', () => {
     const stepDelivered = document.getElementById('step-delivered');
     const deliveryToast = document.getElementById('deliveryToast');
 
-    confirmOrderBtn.addEventListener('click', () => {
+    confirmOrderBtn.addEventListener('click', async () => {
+
+        // ── 1. Gather data from existing UI ──────────────────────────────
+        const tableNumberText = document.getElementById('conf-table').textContent.trim();
+        const tableNumber     = parseInt(tableNumberText) || 0;
+
+        // Build a summary of items from the live cart
+        const groupedForFirestore = {};
+        orderCart.forEach(item => {
+            if (groupedForFirestore[item.name]) {
+                groupedForFirestore[item.name].quantity += 1;
+            } else {
+                groupedForFirestore[item.name] = {
+                    food:     item.name,
+                    price:    item.price,
+                    type:     item.type,
+                    quantity: 1
+                };
+            }
+        });
+        const orderItems = Object.values(groupedForFirestore);
+
+        // Generate a unique orderId  (timestamp + random suffix)
+        const orderId = 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+
+        const orderData = {
+            orderId:     orderId,
+            tableNumber: tableNumber,
+            food:        orderItems,          // array of { food, price, type, quantity }
+            quantity:    orderCart.length,    // total individual items
+            status:      'pending',
+            orderTime:   firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        // ── 2. Disable button while saving ───────────────────────────────
+        confirmOrderBtn.disabled    = true;
+        confirmOrderBtn.textContent = 'Saving…';
+
+        // ── 3. Save to Firestore ─────────────────────────────────────────
+        try {
+            await db.collection('orders').add(orderData);
+            console.log('✅ Order saved to Firestore:', orderId);
+
+            // Brief success indicator on the button before switching views
+            confirmOrderBtn.textContent = 'Order Confirmed ✓';
+
+            // Short delay so the user sees the confirmation tick
+            await new Promise(resolve => setTimeout(resolve, 600));
+
+        } catch (error) {
+            // ── 4. Error handling ─────────────────────────────────────────
+            console.error('❌ Firestore save failed:', error);
+            confirmOrderBtn.disabled    = false;
+            confirmOrderBtn.textContent = 'Confirm Order';
+            alert('⚠️ Failed to save your order. Please check your internet connection and try again.\n\nError: ' + error.message);
+            return; // Stop here — do NOT proceed to status page
+        } finally {
+            // Reset button text/state (will be visible if user navigates back)
+            confirmOrderBtn.disabled    = false;
+            confirmOrderBtn.textContent = 'Confirm Order';
+        }
+
+        // ── 5. Original UI flow (unchanged) ──────────────────────────────
         switchView('food-status-page');
-        
+
         // Reset status
         currentStatus = 1;
         stepPreparing.classList.add('active');
         stepReady.classList.remove('active');
         stepDelivered.classList.remove('active');
         statusMessage.textContent = 'Your food is being prepared with love!';
-        
+
         // Simulate progress
         setTimeout(() => {
             currentStatus = 2;
             stepReady.classList.add('active');
             statusMessage.textContent = 'Your food is ready and on the way!';
-            
+
             setTimeout(() => {
                 currentStatus = 3;
                 stepDelivered.classList.add('active');
                 statusMessage.textContent = 'Enjoy your meal!';
-                
+
                 // Show delivery toast
                 deliveryToast.classList.remove('hidden');
-                
+
             }, 3000); // 3 seconds from Ready -> Delivered
-            
+
         }, 3000); // 3 seconds from Preparing -> Ready
     });
 

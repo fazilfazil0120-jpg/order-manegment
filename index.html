@@ -12,6 +12,7 @@
     <!-- Firebase SDKs (CDN) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -395,18 +396,7 @@
         </div>
     </div>
 
-    <!-- Firebase Initialization -->
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBNnkksE3WXGPrMbxwu_LYa0JogI-WDbOI",
-            authDomain: "order-manegment-1d33d.firebaseapp.com",
-            projectId: "order-manegment-1d33d",
-            storageBucket: "order-manegment-1d33d.firebasestorage.app",
-            messagingSenderId: "798117022683",
-            appId: "1:798117022683:web:56fee1f1f1cd79a6d435fe"
-        };
-        firebase.initializeApp(firebaseConfig);
-    </script>
+    <!-- Firebase is initialized inside script.js — no duplicate init needed here -->
 
     <script src="script.js"></script>
 </body>
