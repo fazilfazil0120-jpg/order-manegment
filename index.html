@@ -24,6 +24,26 @@
             <p class="login-subtitle">Sign in to book a table &amp; order food</p>
             <div class="login-divider"></div>
 
+            <!-- Email & Password Fields -->
+            <div class="login-form">
+                <div class="login-input-group">
+                    <span class="login-input-icon">✉️</span>
+                    <input type="email" id="loginEmail" placeholder="Email address" autocomplete="email">
+                </div>
+                <div class="login-input-group">
+                    <span class="login-input-icon">🔒</span>
+                    <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
+                    <button class="toggle-pw" id="togglePw" type="button" title="Show/Hide password">👁️</button>
+                </div>
+                <button class="email-login-btn" id="emailLoginBtn">Sign In</button>
+                <p class="login-switch-text">Don't have an account? <a href="#" id="switchToSignup">Sign Up</a></p>
+            </div>
+
+            <!-- OR Divider -->
+            <div class="login-or-divider">
+                <span></span><p>or continue with</p><span></span>
+            </div>
+
             <button class="google-btn" id="googleLoginBtn">
                 <svg width="20" height="20" viewBox="0 0 48 48">
                     <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.6 32.9 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/>
@@ -39,6 +59,27 @@
         </div>
     </div>
 
+    <!-- ================= ROLE SELECTION OVERLAY ================= -->
+    <div id="roleOverlay" class="login-overlay hidden">
+        <div class="role-card">
+            <div class="login-logo">🍽️</div>
+            <h2 class="login-title" style="font-size:1.8rem;">Welcome!</h2>
+            <p class="login-subtitle" id="roleWelcomeMsg">Choose your role to continue</p>
+            <div class="login-divider"></div>
+            <div class="role-options">
+                <button class="role-btn" id="roleServerBtn">
+                    <span class="role-icon">🧑‍🍽️</span>
+                    <span class="role-label">Server</span>
+                    <span class="role-desc">Book tables &amp; take food orders</span>
+                </button>
+                <button class="role-btn" id="roleCookBtn">
+                    <span class="role-icon">🧑‍🍳</span>
+                    <span class="role-label">Cook</span>
+                    <span class="role-desc">View &amp; manage pending orders</span>
+                </button>
+            </div>
+        </div>
+    </div>
     <!-- Navigation -->
     <nav class="navbar scrolled" id="navbar">
         <div class="nav-container">
@@ -47,11 +88,13 @@
                 <li><a href="#" class="nav-btn" data-target="home-view">Home</a></li>
                 <li><a href="#" class="nav-btn" data-target="food-page" id="nav-order-food" style="display:none;">Order Food</a></li>
                 <li><a href="#" class="nav-btn" data-target="bill-page" id="nav-bill" style="display:none;">Bill</a></li>
+                <li><a href="#" class="nav-btn" data-target="cook-dashboard" id="nav-cook-dashboard" style="display:none;">🍳 Kitchen Orders</a></li>
             </ul>
             <!-- User Profile in Navbar -->
             <div class="nav-user" id="navUser" style="display:none;">
                 <img id="navUserPhoto" src="" alt="User" class="nav-user-photo">
                 <span id="navUserName" class="nav-user-name"></span>
+                <span id="navRoleBadge" class="nav-role-badge"></span>
                 <button id="signOutBtn" class="btn-signout">Sign Out</button>
             </div>
             <div class="hamburger" id="hamburger">
@@ -226,7 +269,7 @@
                         </div>
                         <div class="menu-item" data-category="starter">
                             <div class="menu-img-wrap">
-                                <img src="https://images.unsplash.com/photo-1630409351241-e90c9c185a02?w=600&q=80" alt="Idli Sambar">
+                                <img src="Idli-and-Sambar-1.jpg" alt="Idli Sambar">
                                 <span class="price">₹10</span>
                                 <span class="category-tag dish-side">Side Dish</span>
                             </div>
@@ -239,7 +282,7 @@
 
                         <div class="menu-item" data-category="main">
                             <div class="menu-img-wrap">
-                                <img src="masala-dosa.jpg" alt="Masala Dosa">
+                                <img src="Masala Dosa.jpg" alt="Masala Dosa">
                                 <span class="price">₹15</span>
                                 <span class="category-tag dish-main">Main Dish</span>
                             </div>
@@ -252,20 +295,21 @@
 
                         <div class="menu-item" data-category="dessert">
                             <div class="menu-img-wrap">
-                                <img src="https://images.unsplash.com/photo-1609541772874-46d7f1e89c9d?w=600&q=80" alt="Payasam">
-                                <span class="price">₹8</span>
-                                <span class="category-tag dish-side">Side Dish</span>
+                                <img src="Elaneer Payasam.jpg" alt="Elaneer Payasam">
+                                <span class="price">₹255</span>
+                                <span class="category-tag dish-dessert">Dessert</span>
+                                <span class="cod-badge">COD</span>
                             </div>
                             <div class="menu-info">
                                 <h3>Elaneer Payasam</h3>
                                 <p>Rich and creamy dessert made with tender coconut water, milk, and cardamom.</p>
-                                <button class="btn btn-primary btn-sm add-to-cart" data-name="Elaneer Payasam" data-price="8" data-type="Side Dish">Add to Order</button>
+                                <button class="btn btn-primary btn-sm add-to-cart" data-name="Elaneer Payasam" data-price="255" data-type="Dessert">Add to Order</button>
                             </div>
                         </div>
                         
                         <div class="menu-item" data-category="dessert">
                             <div class="menu-img-wrap">
-                                <img src="https://images.unsplash.com/photo-1504627298434-2a5be82a9484?w=600&q=80" alt="Filter Coffee">
+                                <img src="Filter Coffee.jpg" alt="Filter Coffee">
                                 <span class="price">₹5</span>
                                 <span class="category-tag dish-side">Side Dish</span>
                             </div>
@@ -362,6 +406,39 @@
                     </div>
                     
                     <button class="btn btn-primary btn-full mt-20" id="payBtn">Pay Now</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= COOK DASHBOARD VIEW ================= -->
+        <div id="cook-dashboard" class="view-section hidden">
+            <div class="container pt-120">
+                <div class="section-title text-center">
+                    <h2>🍳 Kitchen Orders</h2>
+                    <div class="divider mx-auto"></div>
+                    <p>Manage pending food orders from customers</p>
+                </div>
+
+                <div class="cook-toolbar">
+                    <div class="cook-stats">
+                        <div class="cook-stat-box" id="statPending">
+                            <span class="stat-num" id="pendingCount">0</span>
+                            <span class="stat-label">Pending</span>
+                        </div>
+                        <div class="cook-stat-box ready">
+                            <span class="stat-num" id="readyCount">0</span>
+                            <span class="stat-label">Ready</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline" id="refreshOrdersBtn">🔄 Refresh</button>
+                </div>
+
+                <div class="cook-orders-grid" id="cookOrdersGrid">
+                    <!-- Orders populated by JS -->
+                    <div class="cook-empty-state" id="cookEmptyState">
+                        <div class="empty-icon">🍽️</div>
+                        <p>No pending orders right now.<br>Waiting for new orders...</p>
+                    </div>
                 </div>
             </div>
         </div>
